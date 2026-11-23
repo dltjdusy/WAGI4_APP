@@ -33,3 +33,35 @@ class SignupSerializer(serializers.ModelSerializer):
         )
 
         return user
+
+from django.contrib.auth import authenticate
+
+
+# 로그인 데이터 검증
+class LoginSerializer(serializers.Serializer):
+
+    email = serializers.EmailField()
+    password = serializers.CharField(
+        write_only=True,
+        trim_whitespace=False
+    )
+
+    # 이메일과 비밀번호 확인
+    def validate(self, attrs):
+        email = attrs.get("email")
+        password = attrs.get("password")
+
+        user = authenticate(
+            request=self.context.get("request"),
+            email=email,
+            password=password
+        )
+
+        if user is None:
+            raise serializers.ValidationError(
+                "이메일 또는 비밀번호가 올바르지 않습니다."
+            )
+
+        attrs["user"] = user
+
+        return attrs
