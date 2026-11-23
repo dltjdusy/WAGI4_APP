@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'violations',
     'users.apps.UsersConfig',
+    'settlements',
 ]
 
 AUTH_USER_MODEL = "users.User"
