@@ -8,14 +8,18 @@ from django.utils import timezone
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 
 from rest_framework_simplejwt.tokens import RefreshToken as JWTRefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.settings import api_settings
 
 from .models import User, RefreshToken as StoredRefreshToken
-from .serializers import SignupSerializer, LoginSerializer
-
+from .serializers import (
+    SignupSerializer,
+    LoginSerializer,
+    UserProfileSerializer
+)
 
 # Refresh Token 검증 및 DB 조회
 def get_valid_refresh_token(raw_token):
@@ -212,7 +216,7 @@ class LogoutView(APIView):
         try:
             with transaction.atomic():
 
-                stored_token = get_valid_refresh_token(raw_token)
+                stored_token, _ = get_valid_refresh_token(raw_token)
 
                 # 토큰 폐기 시각 기록
                 stored_token.revoked_at = timezone.now()
@@ -312,6 +316,24 @@ class TokenRefreshView(APIView):
                     "access": str(new_access),
                     "refresh": new_refresh_token
                 }
+            },
+            status=status.HTTP_200_OK
+        )
+
+# 내 프로필 조회 API
+class MeView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+
+        serializer = UserProfileSerializer(request.user)
+
+        return Response(
+            {
+                "status": 200,
+                "message": "내 프로필 조회에 성공했습니다.",
+                "data": serializer.data
             },
             status=status.HTTP_200_OK
         )
