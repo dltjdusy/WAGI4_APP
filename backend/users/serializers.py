@@ -65,3 +65,18 @@ class LoginSerializer(serializers.Serializer):
         attrs["user"] = user
 
         return attrs
+
+# 내 프로필 조회 데이터
+class UserProfileSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = [
+            "user_id",
+            "email",
+            "nickname",
+            "profile_image_url",
+            "created_at",
+            "updated_at"
+        ]
+        read_only_fields = fields
